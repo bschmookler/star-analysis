@@ -1,6 +1,6 @@
-//Class SimpleReaderMaker
+//Class StSimpleReaderMaker
 
-#include "SimpleReaderMaker.h"
+#include "StSimpleReaderMaker.h"
 
 #include <iostream>
 
@@ -19,9 +19,9 @@
 #include "TFile.h"
 #include "TObjArray.h"
 
-ClassImp(SimpleReaderMaker)                   // Macro for CINT compatibility
+ClassImp(StSimpleReaderMaker)                   // Macro for CINT compatibility
 
-SimpleReaderMaker::SimpleReaderMaker( StMuDstMaker* maker ) : StMaker("SimpleReaderMaker")
+StSimpleReaderMaker::StSimpleReaderMaker( StMuDstMaker* maker ) : StMaker("StSimpleReaderMaker")
 { // Initialize and/or zero all public/private data members here.
   out_file = NULL;
   out_tree = NULL;
@@ -33,18 +33,18 @@ SimpleReaderMaker::SimpleReaderMaker( StMuDstMaker* maker ) : StMaker("SimpleRea
   mMuDstMaker = maker ;     // Pass MuDst pointer to DstAnlysisMaker Class member functions
 }
 
-SimpleReaderMaker::~SimpleReaderMaker() 
+StSimpleReaderMaker::~StSimpleReaderMaker() 
 { // Destroy and/or zero out all public/private data members here.
 }
 
-Int_t SimpleReaderMaker::Init( )
+Int_t StSimpleReaderMaker::Init( )
 { // Do once at the start of the analysis
 
   //FCS DB
   mFcsDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
   //mFcsDb->setDbAccess(0);
   if (!mFcsDb) {
-  	LOG_ERROR << "SimpleReaderMaker::InitRun Failed to get StFcsDb" << endm;
+  	LOG_ERROR << "StSimpleReaderMaker::InitRun Failed to get StFcsDb" << endm;
         return kStFatal;
   }
 
@@ -65,7 +65,7 @@ Int_t SimpleReaderMaker::Init( )
 
 }
 
-Int_t SimpleReaderMaker::Make( ) 
+Int_t StSimpleReaderMaker::Make( ) 
 { // Do each event
 
   //Reset variables
@@ -131,7 +131,7 @@ Int_t SimpleReaderMaker::Make( )
   
 }
 
-Int_t SimpleReaderMaker::Finish( )
+Int_t StSimpleReaderMaker::Finish( )
 { // Do once at the end the analysis
 
   out_file->Write();

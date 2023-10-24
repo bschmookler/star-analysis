@@ -21,7 +21,7 @@ Note how the code contains the following lines:
 if(e>0.0)
 {
 	kinematics->SetAttr("energy",1);
-	kinematics->Kine(npart, PID, e-0.01, e+0.01, 3.0,  3.01, -pi/2, pi);
+	kinematics->Kine(npart, PID, e-0.01, e+0.01, 3.0,  3.01, 0.0, 2*pi);
 }
 ```
 This means the pion will be generated within the pseudorapidity range of 3.0 < eta < 3.01.

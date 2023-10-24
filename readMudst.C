@@ -5,7 +5,7 @@ void readMudst(Int_t nEvents, Int_t nFiles, TString InputFileList, TString Outpu
   gROOT   -> Macro("loadMuDst.C");
   gROOT   -> Macro("Load.C");
   gSystem -> Load("StFcsDbMaker");
-  gSystem -> Load("SimpleReaderMaker.so");
+  gSystem -> Load("StSimpleReaderMaker.so");
   gSystem -> Load("StEpdUtil");
 
   // List of member links in the chain
@@ -34,7 +34,7 @@ void readMudst(Int_t nEvents, Int_t nFiles, TString InputFileList, TString Outpu
   StFcsDbMaker *fcsDbMkr = new StFcsDbMaker();
 
   //Analysis Maker
-  SimpleReaderMaker* AnalysisCode  =  new SimpleReaderMaker(muDstMaker) ;
+  StSimpleReaderMaker* AnalysisCode  =  new StSimpleReaderMaker(muDstMaker) ;
 
   // Turn off everything but FCS Hits in order to speed up the analysis and eliminate IO
   muDstMaker -> SetStatus("*",0) ;                // Turn off all branches

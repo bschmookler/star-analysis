@@ -1,7 +1,7 @@
-//class SimpleTree
+//class StSimpleTreeMaker
 //
 
-#include "SimpleTree.h"
+#include "StSimpleTreeMaker.h"
 
 #include "StEvent/StEnumerations.h"
 #include "StEvent/StEvent.h"
@@ -19,11 +19,11 @@
 #include "StRoot/StEpdUtil/StEpdGeom.h"
 
 #ifndef SKIPDefImp
-ClassImp(SimpleTree)
+ClassImp(StSimpleTreeMaker)
 #endif
 
 //------------------------
-SimpleTree::SimpleTree(const Char_t* name) : StMaker(name) {
+StSimpleTreeMaker::StSimpleTreeMaker(const Char_t* name) : StMaker(name) {
 
    out_file = NULL;
    out_tree = NULL;
@@ -32,16 +32,16 @@ SimpleTree::SimpleTree(const Char_t* name) : StMaker(name) {
 
 }
 
-SimpleTree::~SimpleTree() {}
+StSimpleTreeMaker::~StSimpleTreeMaker() {}
 
 //-----------------------
-Int_t SimpleTree::Init() {
+Int_t StSimpleTreeMaker::Init() {
 
    //FCS DB
    mFcsDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
    //mFcsDb->setDbAccess(0);
    if (!mFcsDb) {
-      LOG_ERROR << "SimpleTree::InitRun Failed to get StFcsDbMaker" << endm;
+      LOG_ERROR << "StSimpleTreeMaker::InitRun Failed to get StFcsDbMaker" << endm;
       return kStFatal;
    }
 
@@ -65,7 +65,7 @@ Int_t SimpleTree::Init() {
 }
 
 //-----------------------
-Int_t SimpleTree::Finish() {
+Int_t StSimpleTreeMaker::Finish() {
    
    out_file->Write();
    out_file->Close();
@@ -74,17 +74,17 @@ Int_t SimpleTree::Finish() {
 }
 
 //----------------------
-Int_t SimpleTree::Make() {
+Int_t StSimpleTreeMaker::Make() {
 
    //Get StEvent and FCS Collection
    StEvent* event = (StEvent*)GetInputDS("StEvent");
    if (!event) {
-      LOG_ERROR << "SimpleTree::Make did not find StEvent" << endm;
+      LOG_ERROR << "StSimpleTreeMaker::Make did not find StEvent" << endm;
       return kStErr;
    }
    mFcsColl = event->fcsCollection();
    if (!mFcsColl) {
-      LOG_ERROR << "SimpleTree::Make did not find StEvent->StFcsCollection" << endm;
+      LOG_ERROR << "StSimpleTreeMaker::Make did not find StEvent->StFcsCollection" << endm;
       return kStErr;
    }
 

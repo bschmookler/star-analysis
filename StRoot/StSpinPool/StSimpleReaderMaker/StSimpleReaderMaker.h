@@ -1,7 +1,7 @@
-//Class SimpleReaderMaker
+//Class StSimpleReaderMaker
 
-#ifndef SimpleReaderMaker_def
-#define SimpleReaderMaker_def
+#ifndef StSimpleReaderMaker_def
+#define StSimpleReaderMaker_def
 
 #include "StMaker.h"
 #include "TString.h"
@@ -12,7 +12,7 @@ class TTree        ;
 class StFcsDb      ;
 class StEpdGeom    ;
 
-class SimpleReaderMaker : public StMaker
+class StSimpleReaderMaker : public StMaker
 {
   
  private:
@@ -43,8 +43,8 @@ class SimpleReaderMaker : public StMaker
 
  public:
 
-  SimpleReaderMaker(StMuDstMaker* maker) ;       //  Constructor
-  virtual          ~SimpleReaderMaker( ) ;       //  Destructor
+  StSimpleReaderMaker(StMuDstMaker* maker) ;       //  Constructor
+  virtual          ~StSimpleReaderMaker( ) ;       //  Destructor
 
   Int_t Init    ( ) ;                       //  Initiliaze the analysis tools ... done once
   Int_t Make    ( ) ;                       //  The main analysis that is done on each event
@@ -52,7 +52,7 @@ class SimpleReaderMaker : public StMaker
 
   void SetOutputFileName(TString name) {mOutputFileName = name;} // Make name available to member functions
   
-  ClassDef(SimpleReaderMaker,1)                  //  Macro for CINT compatability
+  ClassDef(StSimpleReaderMaker,1)                  //  Macro for CINT compatability
     
 };
 

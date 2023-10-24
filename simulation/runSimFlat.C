@@ -33,11 +33,15 @@ void command( TString cmd ){
 }
 // ----------------------------------------------------------------------------
 void trig( Int_t n=1, char* pid="ele", float e=0.0, float pt=1.5, int npart=1, int print=0){
+    
     char* PID = pid;
     char* ele="e-";
     char* pos="e+";
+    char *piplus="pi+";
     if(pid[0]=='e' && pid[1]=='l' && pid[2]=='e') PID=ele;
     if(pid[0]=='p' && pid[1]=='o' && pid[2]=='s') PID=pos;
+    if(pid[0]=='p' && pid[1]=='i' && pid[2]=='p') PID=piplus;
+    
     for ( Int_t i=0; i<n; i++ ) {
 	double pi=3.141592654;
 	cout << "==== Event="<<i<<"===="<<endl;
@@ -48,7 +52,7 @@ void trig( Int_t n=1, char* pid="ele", float e=0.0, float pt=1.5, int npart=1, i
 	    // In kinematics, generates single particle before Make is called.	
 	    //kinematics->Kine(npart, PID, e-0.01, e+0.01, 2.2,  4.2, 0.0, 3.141592654*2.0);
 	    //kinematics->Kine(npart, PID, e-0.01, e+0.01, 3.0,  3.01, 0.0, 3.141592654*2.0);
-	    kinematics->Kine(npart, PID, e-0.01, e+0.01, 3.0,  3.01, -pi/2, pi);	    
+	    kinematics->Kine(npart, PID, e-0.01, e+0.01, 3.0,  3.01, 0.0, 2*pi);	    
 	    //kinematics->Kine(npart, PID, e-0.01, e+0.01, 2.2,  4.0, 0.0, 2*pi);	    
 	    //kinematics->Kine(npart, PID, e-0.01, e+0.01, 2.60, 4.0, 0.0, 3.141592654*2.0);
 	    //kinematics->Kine( 1, PID, 2.99, 3.01, 2.50, 4.20, 0.0, 3.141592654/2.0);

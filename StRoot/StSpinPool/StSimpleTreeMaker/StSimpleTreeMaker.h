@@ -1,8 +1,8 @@
-// class SimpleTree
+// class StSimpleTreeMaker
 //
 
-#ifndef SIMPLETREE_HH
-#define SIMPLETREE_HH
+#ifndef STSIMPLETREEMAKER_HH
+#define STSIMPLETREEMAKER_HH
 
 #include "StEnumerations.h"
 #include "StMaker.h"
@@ -20,10 +20,10 @@ class StFcsCollection;
 class StFcsDb;
 class StEpdGeom;
 
-class SimpleTree : public StMaker {
+class StSimpleTreeMaker : public StMaker {
   public:
-   SimpleTree(const Char_t* name = "SimpleTree");
-   ~SimpleTree();
+   StSimpleTreeMaker(const Char_t* name = "StSimpleTreeMaker");
+   ~StSimpleTreeMaker();
    Int_t Init();
    Int_t Make();
    Int_t Finish();
@@ -55,7 +55,7 @@ class SimpleTree : public StMaker {
    float Cal_hit_posz[5000];
 
 #ifndef SKIPDefImp
-   ClassDef(SimpleTree, 0)
+   ClassDef(StSimpleTreeMaker, 0)
 #endif
 };
 

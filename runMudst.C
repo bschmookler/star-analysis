@@ -46,21 +46,22 @@ void runMudst(Int_t nEvents, Int_t nFiles, TString InputFileList, char* outdir="
     hit->setReadMuDst(readMuDst);
    
     StFcsWaveformFitMaker *wff= new StFcsWaveformFitMaker();
-    wff->setEnergySelect(13,13,1); //wff->setEnergySelect(10); //Default is (10,10,1)
+    wff->setEnergySelect(13,13,1); //Default is (10,10,1)
     wff->setMaxPeak(8);
     wff->SetDebug(debug);
 
-    //StFcsClusterMaker *clu= new StFcsClusterMaker();
-    //StFcsPointMaker *poi= new StFcsPointMaker();
-    //clu->SetDebug(debug);
-    //poi->SetDebug(debug);
+    StFcsClusterMaker *clu= new StFcsClusterMaker();
+    clu->SetDebug(debug);
+
+    StFcsPointMaker *poi= new StFcsPointMaker();
+    poi->SetDebug(debug);
 
     //gSystem->Load("StVpdCalibMaker");
     //StVpdCalibMaker *vpdCalib = new StVpdCalibMaker();
     //vpdCalib->setMuDstIn();
 
-    gSystem->Load("SimpleTree");
-    SimpleTree* AnalysisCode = new SimpleTree();
+    gSystem->Load("StSimpleTreeMaker");
+    StSimpleTreeMaker* AnalysisCode = new StSimpleTreeMaker();
     AnalysisCode->SetOutputFileName("SimpleTree.root");
     if ( nEvents == 0 )  nEvents = 10000000 ;       // Take all events in nFiles if nEvents = 0
 
