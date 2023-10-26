@@ -36,10 +36,12 @@ void readMudst(Int_t nEvents, Int_t nFiles, TString InputFileList, TString Outpu
   //Analysis Maker
   StSimpleReaderMaker* AnalysisCode  =  new StSimpleReaderMaker(muDstMaker) ;
 
-  // Turn off everything but FCS Hits in order to speed up the analysis and eliminate IO
-  muDstMaker -> SetStatus("*",0) ;                // Turn off all branches
-  muDstMaker -> SetStatus("MuEvent",1) ;          // Turn on the Event data (esp. Event number)
-  muDstMaker -> SetStatus("FcsHit",1) ;           // Turn on the FCS Hit data
+  // In order to speed up the analysis and eliminate IO, turn off unneeded branches
+  //FIX ME: StMuMCTrack won't set status to 1 after being turned off
+  //muDstMaker -> SetStatus("*",0) ;                // Turn off all branches
+  //muDstMaker -> SetStatus("MuEvent",1) ;          // Turn on the Event data (esp. Event number)
+  //muDstMaker -> SetStatus("StMuMcTrack",1) ;      // Turn on the MC Track data
+  //muDstMaker -> SetStatus("FcsHit",1) ;           // Turn on the FCS Hit data
 
   // Miscellaneous things we need before starting the chain
   //TString Name = JobIdName ; //Name.Append(".histograms.root") ;

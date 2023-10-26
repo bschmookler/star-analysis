@@ -30,7 +30,6 @@ class StSimpleReaderMaker : public StMaker
 
   //TTree Branch variables
   int Cal_nhits;
-
   int Cal_detid[5000];
   int Cal_hitid[5000];
   int Cal_adcsum[5000];
@@ -38,6 +37,24 @@ class StSimpleReaderMaker : public StMaker
   float Cal_hit_posx[5000];
   float Cal_hit_posy[5000];
   float Cal_hit_posz[5000];
+
+  int Trk_ntrks;
+  float Trk_px[1000];
+  float Trk_py[1000];
+  float Trk_pz[1000];
+  int Trk_charge[1000];
+  float Trk_chi2[1000];
+  float Trk_ndf[1000]; 
+
+  int mcpart_num;
+  int mcpart_index[1000];
+  int mcpart_geid[1000];
+  int mcpart_idVtxStart[1000];
+  float mcpart_px[1000];
+  float mcpart_py[1000];
+  float mcpart_pz[1000];
+  float mcpart_E[1000];
+  int mcpart_charge[1000];
 
  protected:
 

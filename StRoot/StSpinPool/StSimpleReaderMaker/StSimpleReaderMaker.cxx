@@ -8,7 +8,9 @@
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuFcsHit.h"
 #include "StMuDSTMaker/COMMON/StMuFcsCollection.h"
+#include "StMuDSTMaker/COMMON/StMuMcTrack.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
+#include "StMuDSTMaker/COMMON/StMuFwdTrack.h"
 
 #include "StFcsDbMaker/StFcsDbMaker.h"
 #include "StFcsDbMaker/StFcsDb.h"
@@ -18,6 +20,7 @@
 #include "TTree.h"
 #include "TFile.h"
 #include "TObjArray.h"
+#include "TClonesArray.h"
 
 ClassImp(StSimpleReaderMaker)                   // Macro for CINT compatibility
 
@@ -52,7 +55,6 @@ Int_t StSimpleReaderMaker::Init( )
   out_tree = new TTree("data","Simple Data Tree");
 
   out_tree->Branch("Cal_nhits",&Cal_nhits,"Cal_nhits/I");
-
   out_tree->Branch("Cal_detid",Cal_detid,"Cal_detid[Cal_nhits]/I");
   out_tree->Branch("Cal_hitid",Cal_hitid,"Cal_hitid[Cal_nhits]/I");
   out_tree->Branch("Cal_adcsum",Cal_adcsum,"Cal_adcsum[Cal_nhits]/I");
@@ -60,6 +62,24 @@ Int_t StSimpleReaderMaker::Init( )
   out_tree->Branch("Cal_hit_posx",Cal_hit_posx,"Cal_hit_posx[Cal_nhits]/F");
   out_tree->Branch("Cal_hit_posy",Cal_hit_posy,"Cal_hit_posy[Cal_nhits]/F");
   out_tree->Branch("Cal_hit_posz",Cal_hit_posz,"Cal_hit_posz[Cal_nhits]/F");
+
+  out_tree->Branch("Trk_ntrks",&Trk_ntrks,"Trk_ntrks/I");
+  out_tree->Branch("Trk_px",Trk_px,"Trk_px[Trk_ntrks]/F");
+  out_tree->Branch("Trk_py",Trk_py,"Trk_py[Trk_ntrks]/F");
+  out_tree->Branch("Trk_pz",Trk_pz,"Trk_pz[Trk_ntrks]/F");
+  out_tree->Branch("Trk_charge",Trk_charge,"Trk_charge[Trk_ntrks]/I");
+  out_tree->Branch("Trk_chi2",Trk_chi2,"Trk_chi2[Trk_ntrks]/F");
+  out_tree->Branch("Trk_ndf",Trk_ndf,"Trk_ndf[Trk_ntrks]/F");
+
+  out_tree->Branch("mcpart_num",&mcpart_num,"mcpart_num/I");
+  out_tree->Branch("mcpart_index",mcpart_index,"mcpart_index[mcpart_num]/I");
+  out_tree->Branch("mcpart_geid",mcpart_geid,"mcpart_geid[mcpart_num]/I");
+  out_tree->Branch("mcpart_idVtxStart",mcpart_idVtxStart,"mcpart_idVtxStart[mcpart_num]/I");
+  out_tree->Branch("mcpart_px",mcpart_px,"mcpart_px[mcpart_num]/F");
+  out_tree->Branch("mcpart_py",mcpart_py,"mcpart_py[mcpart_num]/F");
+  out_tree->Branch("mcpart_pz",mcpart_pz,"mcpart_pz[mcpart_num]/F");
+  out_tree->Branch("mcpart_E",mcpart_E,"mcpart_E[mcpart_num]/F");
+  out_tree->Branch("mcpart_charge",mcpart_charge,"mcpart_charge[mcpart_num]/I");
 
   return kStOK ; 
 
@@ -69,12 +89,14 @@ Int_t StSimpleReaderMaker::Make( )
 { // Do each event
 
   //Reset variables
-  Cal_nhits = 0;
+  Cal_nhits = 0; mcpart_num = 0;
 
+  // -----------
   // Get 'event' data 
   //StMuEvent* muEvent = mMuDstMaker->muDst()->event() ;
 
-  // Get FCS data and fill TTree
+  // -----------
+  // Get FCS data
   StMuFcsCollection* hits = mMuDstMaker->muDst()->muFcsCollection();  // Array containing the FCS Hits
 
   for(UInt_t ihit = 0 ; ihit < hits->numberOfHits() ; ihit++){
@@ -122,6 +144,49 @@ Int_t StSimpleReaderMaker::Make( )
 		Cal_nhits++;
 	}
   } //Loop over FCS hits
+
+  // -----------
+  // Get Fwd track data
+  StMuFwdTrackCollection * ftc = mMuDstMaker->muDst()->muFwdTrackCollection();
+  Trk_ntrks = ftc->numberOfFwdTracks();
+  
+  for ( size_t iTrack = 0; iTrack < ftc->numberOfFwdTracks(); iTrack++ ){
+
+	StMuFwdTrack * muFwdTrack = ftc->getFwdTrack( iTrack );
+
+	Trk_px[iTrack] = muFwdTrack->momentum().Px();
+	Trk_py[iTrack] = muFwdTrack->momentum().Py();
+	Trk_pz[iTrack] = muFwdTrack->momentum().Pz();
+ 	Trk_charge[iTrack] = muFwdTrack->charge();
+  	Trk_chi2[iTrack] = muFwdTrack->chi2();
+  	Trk_ndf[iTrack] = muFwdTrack->ndf();
+
+  } //Loop over Fwd tracks
+
+  // -----------
+  // Retrieve pointer to MC tracks
+  TClonesArray *mcTracks = mMuDstMaker->muDst()->mcArray(1);
+  
+  // Loop over MC tracks
+  for (Int_t iTrk=0; iTrk<mcTracks->GetEntriesFast(); iTrk++) {
+	// Retrieve i-th MC tracks from MuDst
+  	StMuMcTrack *mcTrack = (StMuMcTrack*)mcTracks->UncheckedAt(iTrk);
+
+	if ( !mcTrack ) continue;
+
+	mcpart_index[mcpart_num] = mcTrack->Id();
+	mcpart_geid[mcpart_num] = mcTrack->GePid();
+  	mcpart_idVtxStart[mcpart_num] = mcTrack->IdVx();
+  	mcpart_px[mcpart_num] = mcTrack->Pxyz().x();
+  	mcpart_py[mcpart_num] = mcTrack->Pxyz().y();
+  	mcpart_pz[mcpart_num] = mcTrack->Pxyz().z();
+  	mcpart_E[mcpart_num] = mcTrack->E();
+  	mcpart_charge[mcpart_num] = mcTrack->Charge();
+
+	//Increment number of MC tracks
+	mcpart_num++;
+
+  } //Loop over MC tracks
 
   mEventsProcessed++ ;
   
