@@ -9,6 +9,7 @@
 #include "StMuDSTMaker/COMMON/StMuFcsHit.h"
 #include "StMuDSTMaker/COMMON/StMuFcsCollection.h"
 #include "StMuDSTMaker/COMMON/StMuMcTrack.h"
+#include "StMuDSTMaker/COMMON/StMuMcVertex.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuFwdTrack.h"
 
@@ -70,16 +71,25 @@ Int_t StSimpleReaderMaker::Init( )
   out_tree->Branch("Trk_charge",Trk_charge,"Trk_charge[Trk_ntrks]/I");
   out_tree->Branch("Trk_chi2",Trk_chi2,"Trk_chi2[Trk_ntrks]/F");
   out_tree->Branch("Trk_ndf",Trk_ndf,"Trk_ndf[Trk_ntrks]/F");
+  out_tree->Branch("Trk_proj_ecal_x",Trk_proj_ecal_x,"Trk_proj_ecal_x[Trk_ntrks]/F");
+  out_tree->Branch("Trk_proj_ecal_y",Trk_proj_ecal_y,"Trk_proj_ecal_y[Trk_ntrks]/F");
+  out_tree->Branch("Trk_proj_ecal_z",Trk_proj_ecal_z,"Trk_proj_ecal_z[Trk_ntrks]/F");
+  out_tree->Branch("Trk_proj_hcal_x",Trk_proj_hcal_x,"Trk_proj_hcal_x[Trk_ntrks]/F");
+  out_tree->Branch("Trk_proj_hcal_y",Trk_proj_hcal_y,"Trk_proj_hcal_y[Trk_ntrks]/F");
+  out_tree->Branch("Trk_proj_hcal_z",Trk_proj_hcal_z,"Trk_proj_hcal_z[Trk_ntrks]/F");
 
   out_tree->Branch("mcpart_num",&mcpart_num,"mcpart_num/I");
   out_tree->Branch("mcpart_index",mcpart_index,"mcpart_index[mcpart_num]/I");
   out_tree->Branch("mcpart_geid",mcpart_geid,"mcpart_geid[mcpart_num]/I");
-  out_tree->Branch("mcpart_idVtxStart",mcpart_idVtxStart,"mcpart_idVtxStart[mcpart_num]/I");
+  out_tree->Branch("mcpart_idVtx",mcpart_idVtx,"mcpart_idVtx[mcpart_num]/I");
   out_tree->Branch("mcpart_px",mcpart_px,"mcpart_px[mcpart_num]/F");
   out_tree->Branch("mcpart_py",mcpart_py,"mcpart_py[mcpart_num]/F");
   out_tree->Branch("mcpart_pz",mcpart_pz,"mcpart_pz[mcpart_num]/F");
   out_tree->Branch("mcpart_E",mcpart_E,"mcpart_E[mcpart_num]/F");
   out_tree->Branch("mcpart_charge",mcpart_charge,"mcpart_charge[mcpart_num]/I");
+  out_tree->Branch("mcpart_Vtx_x",mcpart_Vtx_x,"mcpart_Vtx_x[mcpart_num]/F");
+  out_tree->Branch("mcpart_Vtx_y",mcpart_Vtx_y,"mcpart_Vtx_y[mcpart_num]/F");
+  out_tree->Branch("mcpart_Vtx_z",mcpart_Vtx_z,"mcpart_Vtx_z[mcpart_num]/F");
 
   return kStOK ; 
 
@@ -161,6 +171,31 @@ Int_t StSimpleReaderMaker::Make( )
   	Trk_chi2[iTrack] = muFwdTrack->chi2();
   	Trk_ndf[iTrack] = muFwdTrack->ndf();
 
+	// Set track projections to large negative values initially
+	// in case track projection fails
+	Trk_proj_ecal_x[iTrack] = -9999.;
+	Trk_proj_ecal_y[iTrack] = -9999.;
+	Trk_proj_ecal_z[iTrack] = -9999.;
+	Trk_proj_hcal_x[iTrack] = -9999.;
+        Trk_proj_hcal_y[iTrack] = -9999.;
+        Trk_proj_hcal_z[iTrack] = -9999.;
+
+	// Get track projections
+	for ( auto proj : muFwdTrack->mProjections ) {
+		//FCS ECal
+		if (proj.mDetId == 41) { //See StEvent/StDetectorDefinitions.h
+			Trk_proj_ecal_x[iTrack] = proj.mXYZ.x();
+			Trk_proj_ecal_y[iTrack] = proj.mXYZ.y();
+			Trk_proj_ecal_z[iTrack] = proj.mXYZ.z();
+		}
+		//FCS HCal
+		if (proj.mDetId == 42) { //See StEvent/StDetectorDefinitions.h
+                        Trk_proj_hcal_x[iTrack] = proj.mXYZ.x();
+                        Trk_proj_hcal_y[iTrack] = proj.mXYZ.y();
+                        Trk_proj_hcal_z[iTrack] = proj.mXYZ.z();
+                }
+	} //Loop over track projections
+
   } //Loop over Fwd tracks
 
   // -----------
@@ -176,12 +211,29 @@ Int_t StSimpleReaderMaker::Make( )
 
 	mcpart_index[mcpart_num] = mcTrack->Id();
 	mcpart_geid[mcpart_num] = mcTrack->GePid();
-  	mcpart_idVtxStart[mcpart_num] = mcTrack->IdVx();
+  	mcpart_idVtx[mcpart_num] = mcTrack->IdVx();  //ID of creation vertex
   	mcpart_px[mcpart_num] = mcTrack->Pxyz().x();
   	mcpart_py[mcpart_num] = mcTrack->Pxyz().y();
   	mcpart_pz[mcpart_num] = mcTrack->Pxyz().z();
   	mcpart_E[mcpart_num] = mcTrack->E();
   	mcpart_charge[mcpart_num] = mcTrack->Charge();
+
+	// Find associated creation vertex
+	// Retrieve pointer to MC vertices
+	TClonesArray *mcVertices = mMuDstMaker->muDst()->mcArray(0);
+	
+	// Loop over MC vertices
+	for (Int_t iVtx=0; iVtx<mcVertices->GetEntriesFast(); iVtx++) {
+
+    		// Retrieve i-th MC vertex from MuDst
+    		StMuMcVertex *mcVertex = (StMuMcVertex*)mcVertices->UncheckedAt(iVtx);
+	
+		if ( mcVertex->Id()==mcTrack->IdVx() ) {
+			mcpart_Vtx_x[mcpart_num] = mcVertex->XyzV().x();	
+			mcpart_Vtx_y[mcpart_num] = mcVertex->XyzV().y();
+			mcpart_Vtx_z[mcpart_num] = mcVertex->XyzV().z();
+		}
+	} //Loop over MC vertices
 
 	//Increment number of MC tracks
 	mcpart_num++;

@@ -45,16 +45,25 @@ class StSimpleReaderMaker : public StMaker
   int Trk_charge[1000];
   float Trk_chi2[1000];
   float Trk_ndf[1000]; 
+  float Trk_proj_ecal_x[1000];
+  float Trk_proj_ecal_y[1000];
+  float Trk_proj_ecal_z[1000];
+  float Trk_proj_hcal_x[1000];
+  float Trk_proj_hcal_y[1000];
+  float Trk_proj_hcal_z[1000];
 
   int mcpart_num;
   int mcpart_index[1000];
   int mcpart_geid[1000];
-  int mcpart_idVtxStart[1000];
+  int mcpart_idVtx[1000];
   float mcpart_px[1000];
   float mcpart_py[1000];
   float mcpart_pz[1000];
   float mcpart_E[1000];
   int mcpart_charge[1000];
+  float mcpart_Vtx_x[1000];
+  float mcpart_Vtx_y[1000];
+  float mcpart_Vtx_z[1000];
 
  protected:
 

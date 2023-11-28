@@ -8,11 +8,11 @@ In order to save the simulation output to a MuDST file, some changes need to be 
 
 For the FCS, we extract the hit energy directly from the <i>.fzd</i> file by running the <i>WaveFormFitMaker</i> with the option given [here](https://github.com/star-bnl/star-sw/blob/main/StRoot/StFcsWaveformFitMaker/StFcsWaveformFitMaker.cxx#L475). In order to save the ADC sum to the output MuDST file, we need to add the line ```hits[i]->setAdcSum(adc);``` right after the code [here](https://github.com/star-bnl/star-sw/blob/main/StRoot/StFcsFastSimulatorMaker/StFcsFastSimulatorMaker.cxx#L323).
 
-It is also possible to run using the compiled libraries in <i>stardev</i> environment, provided you compile the libraries in ```StSpinPool```. If you wish to save the ADC sum you need to modify the ```StFcsFastSimulatorMaker``` as described above.
+It is also possible to run using the libraries already in the <i>stardev</i> environment, provided you still compile the libraries in ```StSpinPool```. If you wish to save the ADC sum you need to modify the ```StFcsFastSimulatorMaker``` as described above.
 
 Single-particle simulation
 --------------------------
-To run a single-particle simulation, we can use the [runSimBfc.C](runSimBfc.C) code. To run 100 single negative pion events for pion with 30 GeV energy and Vz = 0, do the following:
+To run a single-particle simulation, we can use the [runSimFlat.C](runSimFlat.C) and the [runSimBfc.C](runSimBfc.C) codes. To run 100 single negative pion events for pions with 30 GeV energy and Vz = 0, do the following:
 ```
 root4star -b -q runSimFlat.C'(100,1,"pi-",30,0,0,1)'
 ```
@@ -34,6 +34,9 @@ This generates a MuDST file, which can then be processed to create a simple ROOT
 ```
 root4star -b -q 'readMudst.C(0,1,"input/pi-.MuDst.root")'
 ```
+
+### Single-particle simulation with tracking
+Follow the instructions in [this](with_tracking) subdirectory in order to include the forward tracking in the reconstruction.
 
 Pythia8 simulation
 ------------------
