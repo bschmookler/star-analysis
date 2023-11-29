@@ -25,3 +25,7 @@ For a MuDST file containing STAR forward upgrade data, we have two codes which c
 Simulation
 ----------
 Information on running simulation studies is provided in the [simulation](simulation) subdirectory.
+
+Analysis examples
+-----------------
+Some example analyses using the final produced ROOT file can be found in the [analysis](analysis) subdirectory.
