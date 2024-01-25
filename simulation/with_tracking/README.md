@@ -2,7 +2,7 @@
 
 How to setup
 ------------
-Using the <i>stardev</i> enviroment, follow the instructions given [here](https://github.com/jdbrice/fwd-software/wiki#accessing-up-to-date-code) to install required libraries.
+Using the <i>stardev</i> enviroment, follow the instructions given [here](https://github.com/jdbrice/fwd-software/wiki#accessing-up-to-date-code) to install the required libraries.
 
 Single-particle simulation
 --------------------------
@@ -14,7 +14,7 @@ This creates a ROOT file with the generated particles, as well as a <i>.fzd</i> 
 
 The events can then be reconstructed by doing
 ```
-root4star -b -q 'recon.C('"${nevents}"',"StFwdTrackMaker_ideal_sim_fst_seed.root", true, true, false,1,"mu-",30)'
+root4star -b -q 'recon.C(100,"StFwdTrackMaker_ideal_sim_fst_seed.root", true, true, false,1,"mu-",30)'
 ```
 This runs [ideal tracking with ftt seeding](https://github.com/jdbrice/fwd-software/wiki#ideal-tracking-use-truth-info). The output of this reconstruction will be a MuDST file, a <i>.event</i> file, and some QA ROOT files. The MuDST file can then be processed to create a simple ROOT TTree for further analysis:
 ```
