@@ -14,7 +14,7 @@ Single-particle simulation
 --------------------------
 To run a single-particle simulation, we can use the [runSimFlat.C](runSimFlat.C) and the [runSimBfc.C](runSimBfc.C) codes. To run 100 single negative pion events for pions with 30 GeV energy and Vz = 0, do the following:
 ```
-root4star -b -q runSimFlat.C'(100,1,"pi-",30,0,0,1)'
+root4star -b -q 'runSimFlat.C(100,1,"pi-",30,0,0,1)'
 ```
 Note how the code contains the following lines:
 ```
@@ -28,7 +28,7 @@ This means the pion will be generated within the pseudorapidity range of 3.0 < e
 
 This creates a ROOT file with the generated particles, as well as a <i>.fzd</i> file with the detector response information. The events can then be reconstructed by doing
 ```
-root4star -b -q runSimBfc.C'(100,1,"pi-",202207,0,30)'
+root4star -b -q 'runSimBfc.C(100,1,"pi-",202207,0,30)'
 ```
 This generates a MuDST file, which can then be processed to create a simple ROOT TTree for further analysis:
 ```
