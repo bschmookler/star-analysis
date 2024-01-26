@@ -14,10 +14,15 @@ This creates a ROOT file with the generated particles, as well as a <i>.fzd</i> 
 
 The events can then be reconstructed by doing
 ```
-root4star -b -q 'recon.C(100,"StFwdTrackMaker_ideal_sim_fst_seed.root", true, true, false,1,"mu-",30)'
+root4star -b -q 'recon.C(100,"StFwdTrackMaker_ideal_sim_ftt_seed.root", false, true, false,1,"mu-",30)'
 ```
 This runs [ideal tracking with ftt seeding](https://github.com/jdbrice/fwd-software/wiki#ideal-tracking-use-truth-info). The output of this reconstruction will be a MuDST file, a <i>.event</i> file, and some QA ROOT files. The MuDST file can then be processed to create a simple ROOT TTree for further analysis:
 ```
 root4star -b -q 'readMudst.C(0,1,"input/mu-.MuDst.root")'
+```
+
+To run using ideal tracking with <i>fst</i> seeding instead, do the following during the reconstruction step:
+```
+root4star -b -q 'recon.C(100,"StFwdTrackMaker_ideal_sim_fst_seed.root", true, true, false,1,"mu-",30)'
 ```
 
