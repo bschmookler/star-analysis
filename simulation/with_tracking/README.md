@@ -2,7 +2,7 @@
 
 How to setup
 ------------
-Using the <i>stardev</i> enviroment, follow the instructions given [here](https://github.com/jdbrice/fwd-software/wiki#accessing-up-to-date-code) to install the required libraries.
+Using the <i>stardev</i> enviroment, follow the instructions given [here](https://github.com/jdbrice/star-sw-1/wiki#accessing-up-to-date-code) to install the required libraries.
 
 Single-particle simulation
 --------------------------
