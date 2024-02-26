@@ -71,6 +71,9 @@ void recon( int n = 5, // nEvents to run
     gSystem->Load( "libStFttSimMaker" );
     gSystem->Load( "libStFcsTrackMatchMaker" );
 
+    gSystem->Load( "libMathMore.so" );
+    gSystem->Load( "libStarGeneratorUtil" );
+
     // FCS setup, if included
     if (useFCS) {
 
@@ -92,14 +95,13 @@ void recon( int n = 5, // nEvents to run
         fcsclu->setDebug(1);
     }
 
-    // {
         gSystem->Load("StFwdUtils.so");
-    //     StFwdJPsiMaker *fwdJPsi = new StFwdJPsiMaker();
-    //     fwdJPsi->SetDebug();
-    //     chain->AddMaker(fwdJPsi);
-    //     goto chain_loop;
-    // }
-    
+	/*
+         StFwdJPsiMaker *fwdJPsi = new StFwdJPsiMaker();
+         fwdJPsi->SetDebug();
+         chain->AddMaker(fwdJPsi);
+         goto chain_loop;
+	*/
 
         // Configure FST FastSim
         TString qaoutname(gSystem->BaseName(infile));
@@ -116,8 +118,9 @@ void recon( int n = 5, // nEvents to run
 
 
     // Configure the Forward Tracker
-        StFwdTrackMaker * fwdTrack = (StFwdTrackMaker*) chain->GetMaker( "fwdTrack" );
-        
+    StFwdTrackMaker * fwdTrack = (StFwdTrackMaker*) chain->GetMaker( "fwdTrack" );
+
+    if ( fwdTrack ){
         // config file set here for ideal simulation
         if (!realisticSim){
             cout << "Configured for ideal simulation (MC finding + MC mom seed)" << endl;
@@ -140,16 +143,17 @@ void recon( int n = 5, // nEvents to run
 
         fwdTrack->setTrackRefit( enableTrackRefit );
         fwdTrack->setOutputFilename( outputName );
-        fwdTrack->SetGenerateTree( true );
-        fwdTrack->SetGenerateHistograms( true );
+        fwdTrack->SetGenerateTree( false );
+        fwdTrack->SetGenerateHistograms( false );
         fwdTrack->SetDebug();
 
-        //StFwdFitQAMaker *fwdFitQA = new StFwdFitQAMaker();
-        //fwdFitQA->SetDebug();
-        //chain->AddAfter("fwdTrack", fwdFitQA);
+        StFwdFitQAMaker *fwdFitQA = new StFwdFitQAMaker();
+        fwdFitQA->SetDebug();
+        chain->AddAfter("fwdTrack", fwdFitQA);
 
         cout << "fwd tracker setup" << endl;
-        
+    }        
+
         if (!useFCS){
             StFwdAnalysisMaker *fwdAna = new StFwdAnalysisMaker();
             fwdAna->SetDebug();

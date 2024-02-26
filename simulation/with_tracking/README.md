@@ -26,3 +26,5 @@ To run using ideal tracking with <i>fst</i> seeding instead, do the following du
 root4star -b -q 'recon.C(100,"StFwdTrackMaker_ideal_sim_fst_seed.root", true, true, false,1,"mu-",30)'
 ```
 
+To run all simulation setting and create the simple tree for further analysis, use the [run_fast.sh](run_fast.sh) file in this directory.
+

@@ -33,7 +33,7 @@ void readMudst(Int_t nEvents, Int_t nFiles, TString InputFileList, TString Outpu
     
   StFcsDbMaker *fcsDbMkr = new StFcsDbMaker();
 
-  //Analysis Maker
+  // Analysis Maker
   StSimpleReaderMaker* AnalysisCode  =  new StSimpleReaderMaker(muDstMaker) ;
 
   // In order to speed up the analysis and eliminate IO, turn off unneeded branches
@@ -44,8 +44,9 @@ void readMudst(Int_t nEvents, Int_t nFiles, TString InputFileList, TString Outpu
   //muDstMaker -> SetStatus("FcsHit",1) ;           // Turn on the FCS Hit data
 
   // Miscellaneous things we need before starting the chain
-  //TString Name = JobIdName ; //Name.Append(".histograms.root") ;
-  AnalysisCode -> SetOutputFileName("SimpleTree_mudst.root") ; // Name the output file for histograms
+  //TString Name = JobIdName ; 
+  //Name.Append(".histograms.root") ;
+  AnalysisCode -> SetOutputFileName("SimpleTree_mudst.root") ; // Name the output file
   if ( nEvents == 0 )  nEvents = 10000000 ;       // Take all events in nFiles if nEvents = 0
 
   // Loop over the links in the chain

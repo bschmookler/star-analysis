@@ -1,4 +1,4 @@
-//Class StSimpleReaderMaker
+// Class StSimpleReaderMaker
 
 #include "StSimpleReaderMaker.h"
 
@@ -32,7 +32,7 @@ StSimpleReaderMaker::StSimpleReaderMaker( StMuDstMaker* maker ) : StMaker("StSim
   mOutputFileName = "";
   mEventsProcessed = 0;
 
-  mEpdgeo = new StEpdGeom;  //EPD geom.
+  mEpdgeo = new StEpdGeom;  // EPD geom.
 
   mMuDstMaker = maker ;     // Pass MuDst pointer to DstAnlysisMaker Class member functions
 }
@@ -44,9 +44,9 @@ StSimpleReaderMaker::~StSimpleReaderMaker()
 Int_t StSimpleReaderMaker::Init( )
 { // Do once at the start of the analysis
 
-  //FCS DB
+  // FCS DB
   mFcsDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
-  //mFcsDb->setDbAccess(0);
+  // mFcsDb->setDbAccess(0);
   if (!mFcsDb) {
   	LOG_ERROR << "StSimpleReaderMaker::InitRun Failed to get StFcsDb" << endm;
         return kStFatal;
@@ -64,6 +64,14 @@ Int_t StSimpleReaderMaker::Init( )
   out_tree->Branch("Cal_hit_posy",Cal_hit_posy,"Cal_hit_posy[Cal_nhits]/F");
   out_tree->Branch("Cal_hit_posz",Cal_hit_posz,"Cal_hit_posz[Cal_nhits]/F");
 
+  out_tree->Branch("Cal_nclus",&Cal_nclus,"Cal_nclus/I");
+  out_tree->Branch("Cal_clus_detid",Cal_clus_detid,"Cal_clus_detid[Cal_nclus]/I");
+  out_tree->Branch("Cal_clus_ntowers",Cal_clus_ntowers,"Cal_clus_ntowers[Cal_nclus]/I");
+  out_tree->Branch("Cal_clus_energy",Cal_clus_energy,"Cal_clus_energy[Cal_nclus]/F");
+  out_tree->Branch("Cal_clus_x",Cal_clus_x,"Cal_clus_x[Cal_nclus]/F");
+  out_tree->Branch("Cal_clus_y",Cal_clus_y,"Cal_clus_y[Cal_nclus]/F");
+  out_tree->Branch("Cal_clus_z",Cal_clus_z,"Cal_clus_z[Cal_nclus]/F");
+	
   out_tree->Branch("Trk_ntrks",&Trk_ntrks,"Trk_ntrks/I");
   out_tree->Branch("Trk_px",Trk_px,"Trk_px[Trk_ntrks]/F");
   out_tree->Branch("Trk_py",Trk_py,"Trk_py[Trk_ntrks]/F");
@@ -98,8 +106,8 @@ Int_t StSimpleReaderMaker::Init( )
 Int_t StSimpleReaderMaker::Make( ) 
 { // Do each event
 
-  //Reset variables
-  Cal_nhits = 0; mcpart_num = 0;
+  // Reset variables
+  Cal_nhits = 0; Cal_nclus = 0; mcpart_num = 0;
 
   // -----------
   // Get 'event' data 
@@ -107,15 +115,16 @@ Int_t StSimpleReaderMaker::Make( )
 
   // -----------
   // Get FCS data
-  StMuFcsCollection* hits = mMuDstMaker->muDst()->muFcsCollection();  // Array containing the FCS Hits
+  StMuFcsCollection* fcs_coll = mMuDstMaker->muDst()->muFcsCollection();  // Array containing the FCS Hits and Clusters
 
-  for(UInt_t ihit = 0 ; ihit < hits->numberOfHits() ; ihit++){
+  // Loop over FCS hits
+  for(UInt_t ihit = 0 ; ihit < fcs_coll->numberOfHits() ; ihit++){
 
-  	StMuFcsHit* hit = hits->getHit(ihit); // Pointer to a hit
+  	StMuFcsHit* hit = fcs_coll->getHit(ihit); // Pointer to a hit
 	
 	int det = hit->detectorId();
 
-        if( det < kFcsNDet ){ //Some entries in MuDST file have detid > 5
+        if( det < kFcsNDet ){ // Some entries in MuDST file have detid > 5
     
     		Cal_detid[Cal_nhits] = det;
    		Cal_hitid[Cal_nhits] = hit->id();
@@ -129,8 +138,8 @@ Int_t StSimpleReaderMaker::Make( )
     			Cal_hit_posy[Cal_nhits] = xyz.y();
     			Cal_hit_posz[Cal_nhits] = xyz.z();
 		}
-	      	else if(det==kFcsPresNorthDetId || det==kFcsPresSouthDetId){ //EPD as Pres.
-			//Adapted from code StFcsEventDisplay.cxx
+	      	else if(det==kFcsPresNorthDetId || det==kFcsPresSouthDetId){ // EPD as Pres.
+			// Adapted from code StFcsEventDisplay.cxx
 			double zepd=375.0;
 			double zfcs=710.0+13.90+15.0;
 			double zr=zfcs/zepd;
@@ -140,8 +149,8 @@ Int_t StSimpleReaderMaker::Make( )
 	       	 	mFcsDb->getEPDfromId(det,hit->id(),pp,tt);
 			mEpdgeo->GetCorners(100*pp+tt,&n,x,y);
  		
-			//Get average of corner positions
-			//N.B. Number of corners is usually 4, sometimes 5	
+			// Get average of corner positions
+			// N.B. Number of corners is usually 4, sometimes 5	
 			for(int i=0; i<n; i++){
 			    xsum += zr*x[i];
 			    ysum += zr*y[i];
@@ -150,10 +159,34 @@ Int_t StSimpleReaderMaker::Make( )
                 	Cal_hit_posy[Cal_nhits] = ysum/n;
                 	Cal_hit_posz[Cal_nhits] = zepd;
 	    	}
-		//Increment number of hits
+		// Increment number of hits
 		Cal_nhits++;
 	}
-  } //Loop over FCS hits
+  } // Loop over FCS hits
+
+  // Loop over FCS clusters
+  for(UInt_t iclus = 0 ; iclus < fcs_coll->numberOfClusters() ; iclus++){
+
+        StMuFcsCluster* clus = fcs_coll->getCluster(iclus); // Pointer to a cluster
+
+	int det = clus->detectorId();
+
+        if( det < kFcsNDet ){ // Some entries in MuDST file have detid > 5
+
+		Cal_clus_detid[Cal_nclus] = det;
+		Cal_clus_ntowers[Cal_nclus] = clus->nTowers();
+		Cal_clus_energy[Cal_nclus] = clus->energy();
+
+		// Get cluster global position
+		StThreeVectorD xyz = mFcsDb->getStarXYZfromColumnRow(det,clus->x(),clus->y());
+		Cal_clus_x[Cal_nclus] = xyz.x();
+		Cal_clus_y[Cal_nclus] = xyz.y();
+		Cal_clus_z[Cal_nclus] = xyz.z();
+
+		// Increment number of clusters
+		Cal_nclus++;
+	}
+  } // Loop over FCS clusters
 
   // -----------
   // Get Fwd track data
@@ -182,21 +215,21 @@ Int_t StSimpleReaderMaker::Make( )
 
 	// Get track projections
 	for ( auto proj : muFwdTrack->mProjections ) {
-		//FCS ECal
-		if (proj.mDetId == 41) { //See StEvent/StDetectorDefinitions.h
+		// FCS ECal
+		if (proj.mDetId == 41) { // See StEvent/StDetectorDefinitions.h
 			Trk_proj_ecal_x[iTrack] = proj.mXYZ.x();
 			Trk_proj_ecal_y[iTrack] = proj.mXYZ.y();
 			Trk_proj_ecal_z[iTrack] = proj.mXYZ.z();
 		}
-		//FCS HCal
-		if (proj.mDetId == 42) { //See StEvent/StDetectorDefinitions.h
+		// FCS HCal
+		if (proj.mDetId == 42) { // See StEvent/StDetectorDefinitions.h
                         Trk_proj_hcal_x[iTrack] = proj.mXYZ.x();
                         Trk_proj_hcal_y[iTrack] = proj.mXYZ.y();
                         Trk_proj_hcal_z[iTrack] = proj.mXYZ.z();
                 }
-	} //Loop over track projections
+	} // Loop over track projections
 
-  } //Loop over Fwd tracks
+  } // Loop over Fwd tracks
 
   // -----------
   // Retrieve pointer to MC tracks
@@ -211,7 +244,7 @@ Int_t StSimpleReaderMaker::Make( )
 
 	mcpart_index[mcpart_num] = mcTrack->Id();
 	mcpart_geid[mcpart_num] = mcTrack->GePid();
-  	mcpart_idVtx[mcpart_num] = mcTrack->IdVx();  //ID of creation vertex
+  	mcpart_idVtx[mcpart_num] = mcTrack->IdVx();  // ID of creation vertex
   	mcpart_px[mcpart_num] = mcTrack->Pxyz().x();
   	mcpart_py[mcpart_num] = mcTrack->Pxyz().y();
   	mcpart_pz[mcpart_num] = mcTrack->Pxyz().z();
@@ -233,16 +266,16 @@ Int_t StSimpleReaderMaker::Make( )
 			mcpart_Vtx_y[mcpart_num] = mcVertex->XyzV().y();
 			mcpart_Vtx_z[mcpart_num] = mcVertex->XyzV().z();
 		}
-	} //Loop over MC vertices
+	} // Loop over MC vertices
 
-	//Increment number of MC tracks
+	// Increment number of MC tracks
 	mcpart_num++;
 
-  } //Loop over MC tracks
+  } // Loop over MC tracks
 
   mEventsProcessed++ ;
   
-  //Fill TTree
+  // Fill TTree
   out_tree->Fill();
   return kStOK ;
   

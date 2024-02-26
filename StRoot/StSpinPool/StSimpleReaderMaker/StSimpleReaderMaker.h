@@ -38,6 +38,14 @@ class StSimpleReaderMaker : public StMaker
   float Cal_hit_posy[5000];
   float Cal_hit_posz[5000];
 
+  int Cal_nclus;
+  int Cal_clus_detid[1000];
+  int Cal_clus_ntowers[1000];
+  float Cal_clus_energy[1000];
+  float Cal_clus_x[1000];
+  float Cal_clus_y[1000];
+  float Cal_clus_z[1000];
+
   int Trk_ntrks;
   float Trk_px[1000];
   float Trk_py[1000];
