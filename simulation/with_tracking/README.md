@@ -26,5 +26,7 @@ To run using ideal tracking with <i>fst</i> seeding instead, do the following du
 root4star -b -q 'recon.C(100,"StFwdTrackMaker_ideal_sim_fst_seed.root", true, true, false,1,"mu-",30)'
 ```
 
-To run all simulation setting and create the simple tree for further analysis, use the [run_fast.sh](run_fast.sh) file in this directory.
+To run all simulation settings and create a simple tree for further analysis, use the [run_fast.sh](run_fast.sh) file in this directory. Note that you will need to compile the <i>StSimpleReaderMaker</i> in this repository to make the final simple ROOT tree.
+
+To run with a single-particle simualtion with uniform eta and energy spectra, use the [runSimUniform.C](runSimUniform.C), [recon_uniform.C](recon_uniform.C), and [run_uniform.sh](run_uniform.sh) files in this directory.
 

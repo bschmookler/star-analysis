@@ -8,14 +8,14 @@
 TString input_dir   = "./";
 TString output_dir  = "./";
 
-void recon( int n = 5, // nEvents to run
-            string outputName = "stFwdTrackMaker_ideal_sim.root",
-            bool useFstForSeedFinding = false, // use FTT (default) or FST for track finding
-            bool enableTrackRefit = true, // Enable track refit (default off)
-            bool realisticSim = false, // enables data-like mode, real track finding and fitting without MC seed
-            Int_t run=1, const char* pid="jet", int e=0, float vz=0.0,
-	    TString myDir=input_dir, TString myOutDir=output_dir
-          ) {
+void recon_uniform( int n = 5, // nEvents to run
+            	    string outputName = "stFwdTrackMaker_ideal_sim.root",
+                    bool useFstForSeedFinding = false, // use FTT (default) or FST for track finding
+                    bool enableTrackRefit = true, // Enable track refit (default off)
+                    bool realisticSim = false, // enables data-like mode, real track finding and fitting without MC seed
+            	    Int_t run=1, const char* pid="jet",
+	            TString myDir=input_dir, TString myOutDir=output_dir
+                  ) {
 
     //Input and output file names
     TString myDat; TString proc(pid);
@@ -27,10 +27,8 @@ void recon( int n = 5, // nEvents to run
         myDat = "pythia6.starsim.fzd";
     }else if(proc.Contains("herwig")){
         myDat = "herwig6.starsim.fzd";
-    }else if(e>0.0){
-        myDat=Form("%s.e%d.vz%d.run%i.fzd",pid,e,(int)vz,run);
     }else{
-        myDat=Form("%s.pt%3.1f.vz%d.run%i.fzd",pid,pt,(int)vz,run);
+        myDat=Form("%s.run%i.fzd",pid,run);
     }
 
     TString infile = myDir+myDat;
