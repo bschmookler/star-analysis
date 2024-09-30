@@ -79,6 +79,8 @@ Int_t StSimpleReaderMaker::Init( )
   out_tree->Branch("Trk_charge",Trk_charge,"Trk_charge[Trk_ntrks]/I");
   out_tree->Branch("Trk_chi2",Trk_chi2,"Trk_chi2[Trk_ntrks]/F");
   out_tree->Branch("Trk_ndf",Trk_ndf,"Trk_ndf[Trk_ntrks]/F");
+  out_tree->Branch("Trk_nseedpoints",Trk_nseedpoints,"Trk_nseedpoints[Trk_ntrks]/I");
+  out_tree->Branch("Trk_nfitpoints",Trk_nfitpoints,"Trk_nfitpoints[Trk_ntrks]/I");
   out_tree->Branch("Trk_proj_ecal_x",Trk_proj_ecal_x,"Trk_proj_ecal_x[Trk_ntrks]/F");
   out_tree->Branch("Trk_proj_ecal_y",Trk_proj_ecal_y,"Trk_proj_ecal_y[Trk_ntrks]/F");
   out_tree->Branch("Trk_proj_ecal_z",Trk_proj_ecal_z,"Trk_proj_ecal_z[Trk_ntrks]/F");
@@ -203,6 +205,8 @@ Int_t StSimpleReaderMaker::Make( )
  	Trk_charge[iTrack] = muFwdTrack->charge();
   	Trk_chi2[iTrack] = muFwdTrack->chi2();
   	Trk_ndf[iTrack] = muFwdTrack->ndf();
+	Trk_nseedpoints[iTrack] = muFwdTrack->numberOfSeedPoints();
+	Trk_nfitpoints[iTrack] = muFwdTrack->numberOfFitPoints();
 
 	// Set track projections to large negative values initially
 	// in case track projection fails

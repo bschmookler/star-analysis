@@ -53,6 +53,8 @@ class StSimpleReaderMaker : public StMaker
   int Trk_charge[1000];
   float Trk_chi2[1000];
   float Trk_ndf[1000]; 
+  int Trk_nseedpoints[1000];
+  int Trk_nfitpoints[1000];
   float Trk_proj_ecal_x[1000];
   float Trk_proj_ecal_y[1000];
   float Trk_proj_ecal_z[1000];
