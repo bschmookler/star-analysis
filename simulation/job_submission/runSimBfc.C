@@ -77,7 +77,7 @@ if(proc.Contains("dy") || proc.Contains("mb") || proc.Contains("jet") || proc.Co
   wff->setEnergySelect(0,0,0);
 
   gSystem->Load("StEpdUtil");
-  gSystem->Load("StSpinPoolSimpleTree");
+  gSystem->Load("StSimpleTreeMaker");
   SimpleTree* simptr = new SimpleTree();
   simptr->SetOutputFileName("SimpleTree.root");
 

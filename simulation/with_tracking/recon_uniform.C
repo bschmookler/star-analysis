@@ -44,6 +44,7 @@ void recon_uniform( int n = 5, // nEvents to run
     bool SiIneff = false;
     bool useConstBz = false;
     bool useFCS = true;
+    bool useZeroB = false;
 
     // to use the geom cache (skip agml build which is faster)
     // set the _geom string to "" and make sure the cache file ("fGeom.root") is present
@@ -72,6 +73,10 @@ void recon_uniform( int n = 5, // nEvents to run
     gSystem->Load( "libMathMore.so" );
     gSystem->Load( "libStarGeneratorUtil" );
 
+    StFttFastSimMaker * fttSim = new StFttFastSimMaker();
+    fttSim->SetDebug();
+    chain->AddAfter("fcsSim", fttSim);
+
     // FCS setup, if included
     if (useFCS) {
 
@@ -93,27 +98,26 @@ void recon_uniform( int n = 5, // nEvents to run
         fcsclu->setDebug(1);
     }
 
-        gSystem->Load("StFwdUtils.so");
-	/*
-         StFwdJPsiMaker *fwdJPsi = new StFwdJPsiMaker();
-         fwdJPsi->SetDebug();
-         chain->AddMaker(fwdJPsi);
-         goto chain_loop;
-	*/
+    gSystem->Load("StFwdUtils.so");
+    /*
+    StFwdJPsiMaker *fwdJPsi = new StFwdJPsiMaker();
+    fwdJPsi->SetDebug();
+    chain->AddMaker(fwdJPsi);
+    goto chain_loop;
+    */
 
-        // Configure FST FastSim
-        TString qaoutname(gSystem->BaseName(infile));
-        qaoutname.ReplaceAll(".fzd", ".FastSimu.QA.root");
-        StFstFastSimMaker *fstFastSim = (StFstFastSimMaker*) chain->GetMaker( "fstFastSim" );;
+    // Configure FST FastSim
+    TString qaoutname(gSystem->BaseName(infile));
+    qaoutname.ReplaceAll(".fzd", ".FastSimu.QA.root");
+    StFstFastSimMaker *fstFastSim = (StFstFastSimMaker*) chain->GetMaker( "fstFastSim" );;
 
-        if (SiIneff)
-            fstFastSim->SetInEfficiency(0.1); // inefficiency of Si 
+    if (SiIneff)
+    	fstFastSim->SetInEfficiency(0.1); // inefficiency of Si 
 
-        fstFastSim->SetQAFileName(qaoutname);
+    fstFastSim->SetQAFileName(qaoutname);
 
-        cout << "Adding StFstFastSimMaker to chain" << endl;
-        chain->AddMaker(fstFastSim);
-
+    cout << "Adding StFstFastSimMaker to chain" << endl;
+    chain->AddMaker(fstFastSim);
 
     // Configure the Forward Tracker
     StFwdTrackMaker * fwdTrack = (StFwdTrackMaker*) chain->GetMaker( "fwdTrack" );
@@ -139,11 +143,19 @@ void recon_uniform( int n = 5, // nEvents to run
         else
             fwdTrack->setSeedFindingWithFtt();
 
-        fwdTrack->setTrackRefit( enableTrackRefit );
+        //fwdTrack->setTrackRefit( enableTrackRefit );
+	fwdTrack->setTrackRefit( false );
+	fwdTrack->SetVisualize( false );
+	fwdTrack->setIncludePrimaryVertexInFit( false );
         fwdTrack->setOutputFilename( outputName );
-        fwdTrack->SetGenerateTree( false );
-        fwdTrack->SetGenerateHistograms( false );
+        //fwdTrack->SetGenerateTree( false );
+        //fwdTrack->SetGenerateHistograms( false );
         fwdTrack->SetDebug();
+
+	if ( useZeroB ){
+        	cout << "Setting B = 0" << endl;
+        	fwdTrack->setZeroB( true );
+        }
 
         StFwdFitQAMaker *fwdFitQA = new StFwdFitQAMaker();
         fwdFitQA->SetDebug();
@@ -160,8 +172,7 @@ void recon_uniform( int n = 5, // nEvents to run
 
     StMuDstMaker * muDstMaker = (StMuDstMaker*)chain->GetMaker( "MuDst" );
     if (useFCS) {
-        // FwdTrack and FcsCluster assciation
-        /*
+        // FwdTrack and FcsCluster assciation 
         gSystem->Load("StFcsTrackMatchMaker");
         StFcsTrackMatchMaker *match = new StFcsTrackMatchMaker();
         match->setMaxDistance(6,10);
@@ -174,19 +185,28 @@ void recon_uniform( int n = 5, // nEvents to run
         chain->AddAfter("FcsTrkMatch", fwdAna);
 
         // Produce MuDst output
-        chain->AddAfter( "FcsTrkMatch", muDstMaker );
-	*/
-
-	StFwdAnalysisMaker *fwdAna = new StFwdAnalysisMaker();
-        fwdAna->SetDebug();
-        chain->AddAfter("fwdTrack", fwdAna);	
-	chain->AddAfter( "fwdAna", muDstMaker );
+        if ( muDstMaker )
+        	chain->AddAfter( "FcsTrkMatch", muDstMaker );
 
     } else {
-        chain->AddAfter( "fwdAna", muDstMaker );
+	if ( muDstMaker )
+        	chain->AddAfter( "fwdAna", muDstMaker );
     }
 
-    
+    if (muDstMaker){
+        StFwdQAMaker *fwdQA = new StFwdQAMaker();
+        fwdQA->SetDebug(2);
+        chain->AddAfter("MuDst", fwdQA);
+    }
+
+    // The PicoDst
+    gSystem->Load("libStPicoEvent");
+    gSystem->Load("libStPicoDstMaker");
+    StPicoDstMaker *picoMk = new StPicoDstMaker(StPicoDstMaker::IoWrite);
+    cout << "picoMk = " << picoMk << endl;
+    picoMk->setVtxMode(StPicoDstMaker::Default);
+
+
 chain_loop:
 	chain->Init();
 
