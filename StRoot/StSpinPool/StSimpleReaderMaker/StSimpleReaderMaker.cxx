@@ -68,6 +68,8 @@ Int_t StSimpleReaderMaker::Init( )
   out_tree->Branch("Cal_clus_detid",Cal_clus_detid,"Cal_clus_detid[Cal_nclus]/I");
   out_tree->Branch("Cal_clus_ntowers",Cal_clus_ntowers,"Cal_clus_ntowers[Cal_nclus]/I");
   out_tree->Branch("Cal_clus_energy",Cal_clus_energy,"Cal_clus_energy[Cal_nclus]/F");
+  out_tree->Branch("Cal_clus_loc_x",Cal_clus_loc_x,"Cal_clus_loc_x[Cal_nclus]/F");
+  out_tree->Branch("Cal_clus_loc_y",Cal_clus_loc_y,"Cal_clus_loc_y[Cal_nclus]/F");
   out_tree->Branch("Cal_clus_x",Cal_clus_x,"Cal_clus_x[Cal_nclus]/F");
   out_tree->Branch("Cal_clus_y",Cal_clus_y,"Cal_clus_y[Cal_nclus]/F");
   out_tree->Branch("Cal_clus_z",Cal_clus_z,"Cal_clus_z[Cal_nclus]/F");
@@ -81,6 +83,10 @@ Int_t StSimpleReaderMaker::Init( )
   out_tree->Branch("Trk_ndf",Trk_ndf,"Trk_ndf[Trk_ntrks]/F");
   out_tree->Branch("Trk_nseedpoints",Trk_nseedpoints,"Trk_nseedpoints[Trk_ntrks]/I");
   out_tree->Branch("Trk_nfitpoints",Trk_nfitpoints,"Trk_nfitpoints[Trk_ntrks]/I");
+  out_tree->Branch("Trk_dca_x",Trk_dca_x,"Trk_dca_x[Trk_ntrks]/F");
+  out_tree->Branch("Trk_dca_y",Trk_dca_y,"Trk_dca_y[Trk_ntrks]/F");
+  out_tree->Branch("Trk_dca_z",Trk_dca_z,"Trk_dca_z[Trk_ntrks]/F");
+  out_tree->Branch("Trk_vtxindex",Trk_vtxindex,"Trk_vtxindex[Trk_ntrks]/I");
   out_tree->Branch("Trk_proj_ecal_x",Trk_proj_ecal_x,"Trk_proj_ecal_x[Trk_ntrks]/F");
   out_tree->Branch("Trk_proj_ecal_y",Trk_proj_ecal_y,"Trk_proj_ecal_y[Trk_ntrks]/F");
   out_tree->Branch("Trk_proj_ecal_z",Trk_proj_ecal_z,"Trk_proj_ecal_z[Trk_ntrks]/F");
@@ -89,9 +95,9 @@ Int_t StSimpleReaderMaker::Init( )
   out_tree->Branch("Trk_proj_hcal_z",Trk_proj_hcal_z,"Trk_proj_hcal_z[Trk_ntrks]/F");
 
   out_tree->Branch("mcpart_num",&mcpart_num,"mcpart_num/I");
-  out_tree->Branch("mcpart_index",mcpart_index,"mcpart_index[mcpart_num]/I");
   out_tree->Branch("mcpart_geid",mcpart_geid,"mcpart_geid[mcpart_num]/I");
   out_tree->Branch("mcpart_idVtx",mcpart_idVtx,"mcpart_idVtx[mcpart_num]/I");
+  out_tree->Branch("mcpart_idVtxEnd",mcpart_idVtxEnd,"mcpart_idVtxEnd[mcpart_num]/I");
   out_tree->Branch("mcpart_px",mcpart_px,"mcpart_px[mcpart_num]/F");
   out_tree->Branch("mcpart_py",mcpart_py,"mcpart_py[mcpart_num]/F");
   out_tree->Branch("mcpart_pz",mcpart_pz,"mcpart_pz[mcpart_num]/F");
@@ -100,6 +106,9 @@ Int_t StSimpleReaderMaker::Init( )
   out_tree->Branch("mcpart_Vtx_x",mcpart_Vtx_x,"mcpart_Vtx_x[mcpart_num]/F");
   out_tree->Branch("mcpart_Vtx_y",mcpart_Vtx_y,"mcpart_Vtx_y[mcpart_num]/F");
   out_tree->Branch("mcpart_Vtx_z",mcpart_Vtx_z,"mcpart_Vtx_z[mcpart_num]/F");
+  out_tree->Branch("mcpart_VtxEnd_x",mcpart_VtxEnd_x,"mcpart_VtxEnd_x[mcpart_num]/F");
+  out_tree->Branch("mcpart_VtxEnd_y",mcpart_VtxEnd_y,"mcpart_VtxEnd_y[mcpart_num]/F");
+  out_tree->Branch("mcpart_VtxEnd_z",mcpart_VtxEnd_z,"mcpart_VtxEnd_z[mcpart_num]/F");
 
   return kStOK ; 
 
@@ -179,6 +188,10 @@ Int_t StSimpleReaderMaker::Make( )
 		Cal_clus_ntowers[Cal_nclus] = clus->nTowers();
 		Cal_clus_energy[Cal_nclus] = clus->energy();
 
+		// Get cluster position in local coordinates
+		Cal_clus_loc_x[Cal_nclus] = clus->x();
+		Cal_clus_loc_y[Cal_nclus] = clus->y();
+
 		// Get cluster global position
 		StThreeVectorD xyz = mFcsDb->getStarXYZfromColumnRow(det,clus->x(),clus->y());
 		Cal_clus_x[Cal_nclus] = xyz.x();
@@ -207,6 +220,10 @@ Int_t StSimpleReaderMaker::Make( )
   	Trk_ndf[iTrack] = muFwdTrack->ndf();
 	Trk_nseedpoints[iTrack] = muFwdTrack->numberOfSeedPoints();
 	Trk_nfitpoints[iTrack] = muFwdTrack->numberOfFitPoints();
+	Trk_dca_x[iTrack] = muFwdTrack->dca().x();
+	Trk_dca_y[iTrack] = muFwdTrack->dca().y();
+	Trk_dca_z[iTrack] = muFwdTrack->dca().z();
+	Trk_vtxindex[iTrack] = muFwdTrack->vertexIndex();
 
 	// Set track projections to large negative values initially
 	// in case track projection fails
@@ -241,21 +258,22 @@ Int_t StSimpleReaderMaker::Make( )
   
   // Loop over MC tracks
   for (Int_t iTrk=0; iTrk<mcTracks->GetEntriesFast(); iTrk++) {
+
 	// Retrieve i-th MC tracks from MuDst
   	StMuMcTrack *mcTrack = (StMuMcTrack*)mcTracks->UncheckedAt(iTrk);
-
 	if ( !mcTrack ) continue;
 
-	mcpart_index[mcpart_num] = mcTrack->Id();
+	//mcpart_index[mcpart_num] = mcTrack->Id();       // Counts particles sequentially
 	mcpart_geid[mcpart_num] = mcTrack->GePid();
-  	mcpart_idVtx[mcpart_num] = mcTrack->IdVx();  // ID of creation vertex
+  	mcpart_idVtx[mcpart_num] = mcTrack->IdVx();       // ID of creation vertex
+        mcpart_idVtxEnd[mcpart_num] = mcTrack->IdVxEnd(); // ID of stop (end) vertex
   	mcpart_px[mcpart_num] = mcTrack->Pxyz().x();
   	mcpart_py[mcpart_num] = mcTrack->Pxyz().y();
   	mcpart_pz[mcpart_num] = mcTrack->Pxyz().z();
   	mcpart_E[mcpart_num] = mcTrack->E();
   	mcpart_charge[mcpart_num] = mcTrack->Charge();
 
-	// Find associated creation vertex
+	// Find associated creation and stop vertex locations
 	// Retrieve pointer to MC vertices
 	TClonesArray *mcVertices = mMuDstMaker->muDst()->mcArray(0);
 	
@@ -265,11 +283,25 @@ Int_t StSimpleReaderMaker::Make( )
     		// Retrieve i-th MC vertex from MuDst
     		StMuMcVertex *mcVertex = (StMuMcVertex*)mcVertices->UncheckedAt(iVtx);
 	
+		// Creation vertex
 		if ( mcVertex->Id()==mcTrack->IdVx() ) {
 			mcpart_Vtx_x[mcpart_num] = mcVertex->XyzV().x();	
 			mcpart_Vtx_y[mcpart_num] = mcVertex->XyzV().y();
 			mcpart_Vtx_z[mcpart_num] = mcVertex->XyzV().z();
 		}
+	
+		// Stop vertex
+		if ( mcTrack->IdVxEnd()==0 ){ // MC track does not have stop vertex
+			mcpart_VtxEnd_x[mcpart_num] = -9999.;
+                        mcpart_VtxEnd_y[mcpart_num] = -9999.;
+                        mcpart_VtxEnd_z[mcpart_num] = -9999.;		
+		}
+		else if ( mcVertex->Id()==mcTrack->IdVxEnd() ) {
+			mcpart_VtxEnd_x[mcpart_num] = mcVertex->XyzV().x();
+                        mcpart_VtxEnd_y[mcpart_num] = mcVertex->XyzV().y();
+                        mcpart_VtxEnd_z[mcpart_num] = mcVertex->XyzV().z();
+		}
+
 	} // Loop over MC vertices
 
 	// Increment number of MC tracks

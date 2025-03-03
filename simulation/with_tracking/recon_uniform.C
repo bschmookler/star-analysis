@@ -53,9 +53,9 @@ void recon_uniform( int n = 5, // nEvents to run
     // Setup the chain for reading an FZD
     TString _chain;
     if ( useFCS )
-        _chain = Form("fzin %s sdt20211016 fstFastSim fcsSim fcsWFF fcsCluster fwdTrack MakeEvent StEvent ReverseField bigbig evout cmudst tree", _geom.Data() );
+        _chain = Form("fzin %s sdt20211016 fstFastSim fcsSim fcsWFF fcsCluster fwdTrack MakeEvent StEvent McEvent ReverseField bigbig evout cmudst tree", _geom.Data() );
     else 
-        _chain = Form("fzin %s sdt20211016 MakeEvent StEvent ReverseField bigbig fstFastSim fcsSim fwdTrack evout cmudst tree", _geom.Data());
+        _chain = Form("fzin %s sdt20211016 MakeEvent StEvent McEvent ReverseField bigbig fstFastSim fcsSim fwdTrack evout cmudst tree", _geom.Data());
 
     gSystem->Load( "libStarRoot.so" );
     gROOT->SetMacroPath(".:/star-sw/StRoot/macros/:./StRoot/macros:./StRoot/macros/graphics:./StRoot/macros/analysis:./StRoot/macros/test:./StRoot/macros/examples:./StRoot/macros/html:./StRoot/macros/qa:./StRoot/macros/calib:./StRoot/macros/mudst:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/graphics:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/analysis:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/test:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/examples:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/html:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/qa:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/calib:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/mudst:/afs/rhic.bnl.gov/star/ROOT/36/5.34.38/.sl73_x8664_gcc485/rootdeb/macros:/afs/rhic.bnl.gov/star/ROOT/36/5.34.38/.sl73_x8664_gcc485/rootdeb/tutorials");

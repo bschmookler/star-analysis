@@ -39,33 +39,40 @@ class StSimpleReaderMaker : public StMaker
   float Cal_hit_posz[5000];
 
   int Cal_nclus;
-  int Cal_clus_detid[1000];
-  int Cal_clus_ntowers[1000];
-  float Cal_clus_energy[1000];
-  float Cal_clus_x[1000];
-  float Cal_clus_y[1000];
-  float Cal_clus_z[1000];
+  int Cal_clus_detid[100];
+  int Cal_clus_ntowers[100];
+  float Cal_clus_energy[100];
+  float Cal_clus_loc_x[100];
+  float Cal_clus_loc_y[100];
+  float Cal_clus_x[100];
+  float Cal_clus_y[100];
+  float Cal_clus_z[100];
 
   int Trk_ntrks;
-  float Trk_px[1000];
-  float Trk_py[1000];
-  float Trk_pz[1000];
-  int Trk_charge[1000];
-  float Trk_chi2[1000];
-  float Trk_ndf[1000]; 
-  int Trk_nseedpoints[1000];
-  int Trk_nfitpoints[1000];
-  float Trk_proj_ecal_x[1000];
-  float Trk_proj_ecal_y[1000];
-  float Trk_proj_ecal_z[1000];
-  float Trk_proj_hcal_x[1000];
-  float Trk_proj_hcal_y[1000];
-  float Trk_proj_hcal_z[1000];
+  float Trk_px[500];
+  float Trk_py[500];
+  float Trk_pz[500];
+  int Trk_charge[500];
+  float Trk_chi2[500];
+  float Trk_ndf[500]; 
+  int Trk_nseedpoints[500];
+  int Trk_nfitpoints[500];
+  float Trk_dca_x[500];
+  float Trk_dca_y[500];
+  float Trk_dca_z[500];
+  int Trk_vtxindex[500];
+  float Trk_proj_ecal_x[500];
+  float Trk_proj_ecal_y[500];
+  float Trk_proj_ecal_z[500];
+  float Trk_proj_hcal_x[500];
+  float Trk_proj_hcal_y[500];
+  float Trk_proj_hcal_z[500];
 
   int mcpart_num;
-  int mcpart_index[1000];
+  //int mcpart_index[1000]; //Counts particles sequentially
   int mcpart_geid[1000];
   int mcpart_idVtx[1000];
+  int mcpart_idVtxEnd[1000];
   float mcpart_px[1000];
   float mcpart_py[1000];
   float mcpart_pz[1000];
@@ -74,6 +81,9 @@ class StSimpleReaderMaker : public StMaker
   float mcpart_Vtx_x[1000];
   float mcpart_Vtx_y[1000];
   float mcpart_Vtx_z[1000];
+  float mcpart_VtxEnd_x[1000];
+  float mcpart_VtxEnd_y[1000];
+  float mcpart_VtxEnd_z[1000];
 
  protected:
 
