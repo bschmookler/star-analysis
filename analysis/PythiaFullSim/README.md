@@ -3,7 +3,7 @@ The scripts in this directory analyze simulated Pythia events which have been pa
 
 Analysis codes in this directory
 --------------------------------
-All analysis codes in this directory use as input the MuDst files converted into a simple TTree. The conversion of the MuDst files into a simple TTree with the readMuDst maker is described [here](/star-analysis/tree/main?tab=readme-ov-file#making-a-simple-root-file-for-analysis).
+All analysis codes in this directory use as input MuDst files converted into a simple TTree with the <i>readMuDst Maker</i>. This conversion of the MuDst files is described [here](/README.md#making-a-simple-root-file-for-analysis).
 
 |Script name    | Description       |
 |:--------------|:------------------|
