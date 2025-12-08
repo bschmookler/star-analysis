@@ -3,11 +3,13 @@ The Run22 p-p data including the Forward tracking is primarily being produced in
 
 How to setup
 ------------
-Using the <i>stardev</i> enviroment, follow the instructions given [here](https://github.com/jdbrice/star-sw-1/wiki#accessing-up-to-date-code) to install the required PicoDst libraries. (Once the official STAR PicoDst libraries are updated to incorporate the Forward detector classes, this step will no longer be needed.)
+The <i>stardev</i> enviroment now incorporates the Forward detector classes. So, no local compilation of any PicoDst libraries is required. 
+
+If you wish to use a local version, follow the instructions given [here](https://github.com/jdbrice/star-sw-1/wiki#accessing-up-to-date-code) to install the required PicoDst libraries.
 
 Creating a list of PicoDst files to analyze
 --------------------------------------------
-Run the following command to create a list of 10 PicoDst files from the test production run on August 28th, 2025:
+Run the following command to create a list of 10 PicoDst files from the test production run on August 27th, 2025:
 
 ```
 ls -1 /gpfs01/star/pwg_tasks/FwdCalib/PROD/forwardCrossSection_2022/27082025/*.root | head -10 | tee infiles_27082025.list
