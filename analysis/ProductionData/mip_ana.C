@@ -23,7 +23,7 @@
 #include "StFcsDbMaker/StFcsDb.h"
 
 static const int mDebug=0;
-int mMaxEvent=400000;
+int mMaxEvent=2e7;
 
 // Track cuts
 int mChi2CutMin = 0;
@@ -182,9 +182,9 @@ void mip_ana(const Char_t *inFile = "infiles.lis") {
     for(int iTrk = 0; iTrk < nTrks; iTrk++){
 	StPicoFwdTrack* t = dst->fwdTrack(iTrk);
 
-      	if( abs(t->numberOfFitPoints()) >= mNHitCut &&
-	    t->chi2() > mChi2CutMin && t->chi2() < mChi2CutMax &&
-	    t->vtxIndex() == 0){
+      	if( t->isPrimaryTrack() && abs(t->numberOfFitPoints()) >= mNHitCut
+	    //&& t->chi2() > mChi2CutMin && t->chi2() < mChi2CutMax &&
+	  ){
 		good_trk_index.push_back(iTrk);
 	}
     } //track loop
