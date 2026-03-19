@@ -25,19 +25,24 @@
 static const int mDebug=0;
 int mMaxEvent=2e7;
 
+// Event Cuts
+float mVtxCutMax = 80; // Cut on primary vertex z position (cm)
+bool mVpdVtxCut = false; // Require vpd vertex to be present
+
 // Track cuts
-int mChi2CutMin = 0;
-int mChi2CutMax = 65000;
+float mChi2CutMin = 0;
+float mChi2CutMax = 65;
 double mNHitCut = 4;
-int mVtxIndex = 0;
 
 double mEcalTowCut = 3; //Cut on track projection to Ecal (cm)
 double mEcalFrac = 0.1; //Energy fraction of adjacent towers in ECal
-int mEcalRows = 22;     //Number of rows in ECal
+int mEcalColumns = 22;  //Number of columns in ECal
+int mEcalColumnMin = 0; //Minimum Ecal column number to consider 
 
 double mHcalTowCut = 5; //Cut on track projection to Hcal (cm)
-double mHcalFrac = 0.1; //Energy fraction of adjacent towers in HCal
-int mHcalRows = 13;     //Number of rows in HCal
+double mHcalFrac = 0.2; //Energy fraction of adjacent towers in HCal
+int mHcalColumns = 13;  //Number of columns in HCal
+int mHcalColumnMin = 0; //Minimum Hcal column number to consider
 
 // Get run number
 int getrun(const char* fname){
@@ -96,6 +101,21 @@ void mip_ana(const Char_t *inFile = "infiles.lis") {
   
   // Define Histograms
 
+  // Event Primary Vertex z position
+  TH1 *he1a = new TH1D("he1a","Event Primary Vertex Z position",100,-150,150);
+  he1a->GetXaxis()->SetTitle("Vertex Z position [cm]");he1a->GetXaxis()->CenterTitle();
+  he1a->SetLineColor(kBlue);he1a->SetLineWidth(2);
+
+  // Event Primary Vertex z position -- vertices with Positive Rankings
+  TH1 *he1b = new TH1D("he1b","Event Primary Vertex Z position",100,-150,150);
+  he1b->GetXaxis()->SetTitle("Vertex Z position [cm]");he1b->GetXaxis()->CenterTitle();
+  he1b->SetLineColor(kGreen);he1b->SetLineWidth(2);
+
+  // Event Primary Vertex z position -- vertices with Positive Rankings + events w/ vpd vertex present
+  TH1 *he1c = new TH1D("he1c","Event Primary Vertex Z position",100,-150,150);
+  he1c->GetXaxis()->SetTitle("Vertex Z position [cm]");he1c->GetXaxis()->CenterTitle();
+  he1c->SetLineColor(kMagenta);he1c->SetLineWidth(2);
+
   // Tower energy spectrum -- FCS ECal
   TH1 *h1a = new TH1D("h1a","FCS ECal",200,0,3);
   h1a->GetXaxis()->SetTitle("Tower Energy [GeV]");h1a->GetXaxis()->CenterTitle();
@@ -124,6 +144,11 @@ void mip_ana(const Char_t *inFile = "infiles.lis") {
   h1e->GetXaxis()->SetTitle("Tower Energy [GeV]");h1e->GetXaxis()->CenterTitle();
   h1e->GetYaxis()->SetTitle("Number of towers (/ 15 MeV)");h1e->GetYaxis()->CenterTitle();
   h1e->SetLineColor(kMagenta);h1e->SetLineWidth(2);
+
+  // Tower row vs. column spectrum -- FCS ECal
+  TH2 *h1f = new TH2D("h1f","FCS ECal",50,-25,25,36,-1,35);
+  h1f->GetXaxis()->SetTitle("#pm (Column Number+2)");h1f->GetXaxis()->CenterTitle();
+  h1f->GetYaxis()->SetTitle("Row Number");h1f->GetYaxis()->CenterTitle();
 
   // Tower energy spectrum -- FCS HCal
   TH1 *h2a = new TH1D("h2a","FCS HCal",200,0,3);
@@ -154,6 +179,28 @@ void mip_ana(const Char_t *inFile = "infiles.lis") {
   h2e->GetYaxis()->SetTitle("Number of towers (/ 15 MeV)");h2e->GetYaxis()->CenterTitle();
   h2e->SetLineColor(kMagenta);h2e->SetLineWidth(2);
 
+  // Tower row vs. column spectrum -- FCS HCal
+  TH2 *h2f = new TH2D("h2f","FCS HCal",30,-15,15,22,-1,21);
+  h2f->GetXaxis()->SetTitle("#pm (Column Number+1)");h2f->GetXaxis()->CenterTitle();
+  h2f->GetYaxis()->SetTitle("Row Number");h2f->GetYaxis()->CenterTitle();
+
+  // Track Chi-square distrbution
+  TH1 *h3a = new TH1D("h3a",Form("Fwd Primary tracks w/ at least %.0f hits",mNHitCut),200,0,100);
+  h3a->GetXaxis()->SetTitle("Track Chi-Square");h3a->GetXaxis()->CenterTitle();
+  h3a->SetLineColor(kBlue);h3a->SetLineWidth(2);
+
+  // Tower energy spectrum with track matching and isolation -- FCS ECal North tower with (Column, Row) = (1,18)
+  TH1 *h4e1 = new TH1D("h4e1","FCS ECal North tower: (Column, Row) = (1,18)",200,0,3);
+  h4e1->GetXaxis()->SetTitle("Tower Energy [GeV]");h4e1->GetXaxis()->CenterTitle();
+  h4e1->GetYaxis()->SetTitle("Number of towers (/ 15 MeV)");h4e1->GetYaxis()->CenterTitle();
+  h4e1->SetLineColor(kRed);h4e1->SetLineWidth(2);
+
+  // Tower energy spectrum with track matching and isolation -- FCS HCal North tower with (Column, Row) = (1,12)
+  TH1 *h4h1 = new TH1D("h4h1","FCS HCal North tower: (Column, Row) = (1,12)",200,0,3);
+  h4h1->GetXaxis()->SetTitle("Tower Energy [GeV]");h4h1->GetXaxis()->CenterTitle();
+  h4h1->GetYaxis()->SetTitle("Number of towers (/ 15 MeV)");h4h1->GetYaxis()->CenterTitle();
+  h4h1->SetLineColor(kRed);h4h1->SetLineWidth(2);
+
   // Loop over events
   for(Long64_t iEvent=0; iEvent<events2read; iEvent++) {
     if(iEvent%1000==0) std::cout << "Working on event #[" << iEvent<< "/" << events2read << "]" << std::endl;
@@ -174,17 +221,35 @@ void mip_ana(const Char_t *inFile = "infiles.lis") {
       break;
     }
 
+    // Apply event-level cuts
+    TVector3 evtVtx = event->primaryVertex();
+    Float_t evtRanking = event->ranking();
+
+    he1a->Fill(evtVtx.Z());
+    if( evtRanking > 0 ) he1b->Fill(evtVtx.Z());
+    if( evtRanking > 0 && fabs(event->vzVpd()) < 500. ) he1c->Fill(evtVtx.Z());
+
+    // Cut on primary vertex
+    if( fabs(evtVtx.z()) > mVtxCutMax && evtRanking < 0) 
+	continue;
+
+    // Cut on presence of vpd vertex
+    if( mVpdVtxCut && fabs(event->vzVpd()) > 500. )
+	continue;
+
     // Vector to hold indices of good tracks
     std::vector<int> good_trk_index;
 
-    // Loop over reconstructed tracks and find set of 'good' tracks
+    // Loop over reconstructed Fwd tracks and find set of 'good' tracks
     int nTrks = dst->numberOfFwdTracks();
     for(int iTrk = 0; iTrk < nTrks; iTrk++){
 	StPicoFwdTrack* t = dst->fwdTrack(iTrk);
 
-      	if( t->isPrimaryTrack() && abs(t->numberOfFitPoints()) >= mNHitCut
-	    //&& t->chi2() > mChi2CutMin && t->chi2() < mChi2CutMax &&
-	  ){
+      	if( t->isPrimaryTrack() && abs(t->numberOfFitPoints()) >= mNHitCut){ // Primary tracks
+
+	    h3a->Fill(t->chi2());
+
+	    if( t->chi2() > mChi2CutMin && t->chi2() < mChi2CutMax ) // Chi-square cut
 		good_trk_index.push_back(iTrk);
 	}
     } //track loop
@@ -201,8 +266,8 @@ void mip_ana(const Char_t *inFile = "infiles.lis") {
            // Get tower information
            float tower_energy = h->energy();
            int tower_det = h->detectorId();
-           int tower_row = int(h->id()/mEcalRows);
-           int tower_column = h->id()%mEcalRows;
+           int tower_row = int(h->id()/mEcalColumns);
+           int tower_column = h->id()%mEcalColumns;
 	   StThreeVectorD xyz = fcsDb->getStarXYZ(tower_det,h->id());
            auto tower_x = xyz.x();
 	   auto tower_y = xyz.y();
@@ -210,8 +275,14 @@ void mip_ana(const Char_t *inFile = "infiles.lis") {
 	   // Some FCS tower hit have energy = 0.
 	   if( tower_energy < 0.00001 ) continue;
 
+           // Only keep columns greater than min value
+	   if( tower_column < mEcalColumnMin ) continue;
+
 	   h1a->Fill(tower_energy);
-           h1b->Fill(tower_energy);
+           h1b->Fill(tower_energy); 
+
+	   int flip = (tower_det == 0) ? 1 : -1;
+           h1f->Fill( flip*(tower_column+2) , tower_row );
 
 	   // Require hit to be close to a track projection
 	   // Full width of ECal towers ~5.57cm
@@ -243,8 +314,8 @@ void mip_ana(const Char_t *inFile = "infiles.lis") {
 
 	     float adj_energy = ha->energy();
              int adj_det = ha->detectorId();
-             int adj_row = int(ha->id()/mEcalRows);
-             int adj_column = ha->id()%mEcalRows;
+             int adj_row = int(ha->id()/mEcalColumns);
+             int adj_column = ha->id()%mEcalColumns;
 
 	     if( adj_det == tower_det &&
 	         abs(adj_row - tower_row) <=1 &&
@@ -258,6 +329,9 @@ void mip_ana(const Char_t *inFile = "infiles.lis") {
            if(matched_to_trk && keep_tower) h1d->Fill(tower_energy);
 	   if(keep_tower) h1e->Fill(tower_energy);
 
+	   if(tower_det == 0 && tower_column == 1 && tower_row == 18 && matched_to_trk && keep_tower)
+	       h4e1->Fill(tower_energy);
+
 	} //ECal if statement
 
 	//FCS Hcal
@@ -265,8 +339,8 @@ void mip_ana(const Char_t *inFile = "infiles.lis") {
 	   // Get tower information
            float tower_energy = h->energy();
            int tower_det = h->detectorId();
-           int tower_row = int(h->id()/mHcalRows);
-           int tower_column = h->id()%mHcalRows;
+           int tower_row = int(h->id()/mHcalColumns);
+           int tower_column = h->id()%mHcalColumns;
            StThreeVectorD xyz = fcsDb->getStarXYZ(tower_det,h->id());
            auto tower_x = xyz.x();
            auto tower_y = xyz.y();
@@ -274,8 +348,14 @@ void mip_ana(const Char_t *inFile = "infiles.lis") {
            // Some FCS tower hit have energy = 0.
            if( tower_energy < 0.00001 ) continue;
 
+	   // Only keep columns greater than min value
+	   if( tower_column < mHcalColumnMin ) continue;
+
 	   h2a->Fill(tower_energy);
            h2b->Fill(tower_energy);
+
+	   int flip = (tower_det == 2) ? 1 : -1;
+           h2f->Fill( flip*(tower_column+1) , tower_row );
 
 	   // Require hit to be close to a track projection
 	   // Full width of HCal towers ~9.99cm
@@ -307,20 +387,23 @@ void mip_ana(const Char_t *inFile = "infiles.lis") {
 
              float adj_energy = ha->energy();
              int adj_det = ha->detectorId();
-             int adj_row = int(ha->id()/mHcalRows);
-             int adj_column = ha->id()%mHcalRows;
+             int adj_row = int(ha->id()/mHcalColumns);
+             int adj_column = ha->id()%mHcalColumns;
 
              if( adj_det == tower_det &&
                  abs(adj_row - tower_row) <=1 &&
                  abs(adj_column - tower_column) <=1 &&
-                 (adj_energy / tower_energy) > mHcalFrac ){
-                        keep_tower = false;
-                        break;
+                 (adj_energy / tower_energy) > mHcalFrac )
+	     {
+                 keep_tower = false;
+                 break;
              }
            } //Adjacent tower loop
 
            if(matched_to_trk && keep_tower) h2d->Fill(tower_energy);
            if(keep_tower) h2e->Fill(tower_energy);
+	   if(tower_det == 2 && tower_column == 1 && tower_row == 12 && matched_to_trk && keep_tower)
+               h4h1->Fill(tower_energy);
 
 	} //HCal if statement
 	
@@ -332,7 +415,33 @@ void mip_ana(const Char_t *inFile = "infiles.lis") {
   // Set Style
   gStyle->SetOptStat(0);
 
-  // Make plots
+  // Make plots 
+  TCanvas *b1a = new TCanvas("b1a");
+  he1a->Draw();
+  he1b->Draw("same");
+
+  TLegend *legb1 = new TLegend(0.55,0.7,0.85,0.875);
+  legb1->SetBorderSize(0); legb1->SetTextSize(0.0275);
+  legb1->AddEntry(he1a,"All events");
+  legb1->AddEntry(he1b,"Events w/ Prim. Vtx Ranking > 0");
+  legb1->Draw();
+
+  TCanvas *b1b = new TCanvas("b1b");
+  he1a->Draw();
+  he1b->Draw("same");
+  he1c->Draw("same");
+
+  TLegend *legb2 = new TLegend(0.55,0.7,0.85,0.875);
+  legb2->SetBorderSize(0); legb2->SetTextSize(0.0275);
+  legb2->AddEntry(he1a,"All events");
+  legb2->AddEntry(he1b,"Events w/ Prim. Vtx Ranking > 0");
+  legb2->AddEntry(he1c,"+Events w/ VPD Vtx present");
+  legb2->Draw();
+
+  TCanvas *b1c = new TCanvas("b1c");
+  b1c->SetLogy();
+  h3a->Draw();
+
   TCanvas *c1a = new TCanvas("c1a");
   c1a->SetLogy();
   h1a->Draw();
@@ -400,9 +509,24 @@ void mip_ana(const Char_t *inFile = "infiles.lis") {
   leg2a->AddEntry(h1a,"All FCS HCal tower hits");
   leg2a->AddEntry(h1e,"Hits w/ isolation requirement only");
   leg2a->Draw();
+ 
+  TCanvas *d1a = new TCanvas("d1a");
+  h1f->Draw("colz");
+
+  TCanvas *d2a = new TCanvas("d2a");
+  h2f->Draw("colz");
+
+  TCanvas *e1a = new TCanvas("e1a");
+  h4e1->Draw();
+
+  TCanvas *e2a = new TCanvas("e2a");
+  h4h1->Draw();
 
   // Print plots to file
-  c1a->Print("plots/mip_ana.pdf[");
+  b1a->Print("plots/mip_ana.pdf[");
+  b1a->Print("plots/mip_ana.pdf");
+  b1b->Print("plots/mip_ana.pdf");
+  b1c->Print("plots/mip_ana.pdf");
   c1a->Print("plots/mip_ana.pdf");
   c1b->Print("plots/mip_ana.pdf");
   c1c->Print("plots/mip_ana.pdf");
@@ -411,7 +535,11 @@ void mip_ana(const Char_t *inFile = "infiles.lis") {
   c2b->Print("plots/mip_ana.pdf");
   c2c->Print("plots/mip_ana.pdf");
   c2d->Print("plots/mip_ana.pdf");
-  c2d->Print("plots/mip_ana.pdf]");
+  d1a->Print("plots/mip_ana.pdf");
+  d2a->Print("plots/mip_ana.pdf");
+  e1a->Print("plots/mip_ana.pdf");
+  e2a->Print("plots/mip_ana.pdf"); 
+  e2a->Print("plots/mip_ana.pdf]");
 
 }
 
