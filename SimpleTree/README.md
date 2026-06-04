@@ -1,10 +1,17 @@
-# star-analysis
+# Making a simple ROOT file for analysis
 
-Making a simple ROOT file for analysis
---------------------------------------
+How to set up and run
+---------------------
+First, compile the maker classes [StRoot/StSpinPool] by doing:
+
+```
+cd StRoot
+cons
+```
+
 For a MuDst file containing STAR Forward Upgrade data, we have two codes which can read the MuDst file and create a simple ROOT TTree.
 
-1. For all data containted in the MuDst file, read the MuDst classes directly. This approach can be found in the macro [readMudst.C](readMudst.C).
+1. For all data contained in the MuDst file, read the MuDst classes directly. This approach can be found in the macro [readMudst.C](readMudst.C).
    
    To run the macro on a single file, the following command can be used:
    ```
