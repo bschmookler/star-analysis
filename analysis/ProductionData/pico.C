@@ -18,5 +18,6 @@ void pico(int do=2, const Char_t *inFile = "infiles.lis") {
   if(do==0) gROOT->ProcessLine(Form(".x match.C+(\"%s\")",inFile));
   if(do==1) gROOT->ProcessLine(Form(".x dilepton.C+(\"%s\")",inFile));
   if(do==2) gROOT->ProcessLine(Form(".x mip_ana.C+(\"%s\")",inFile));
+  if(do==3) gROOT->ProcessLine(Form(".x fwd_qa.C+(\"%s\")",inFile));
 }
 
