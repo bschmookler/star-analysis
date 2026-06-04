@@ -1,6 +1,6 @@
 # star-analysis
 
-Repository for STAR Forward Update data analysis.
+Repository for STAR Forward Upgrade data analysis.
 
 ---
 
