@@ -9,18 +9,39 @@ If you wish to use a local version, follow the instructions given [here](https:/
 
 List of PicoDst files to analyze
 ---------------------------------
-To use the runlist that was generated as part of the production that started in December 2025, create as symbolic link to that list:
+To use the run list that was generated as part of the <i>st-phys stream</i> production that started in December 2025, create as symbolic link to that list:
 
 ```
 ln -s /star/data14/GRID/NFS_FileList/production_pp500_2022_P25ib_st_physics_FwdTrack_picodst.txt production_pp500_2022.list
 ```
 
-Analysis 1: MIP Peak analysis
+If you want to read in the first 50 files, for example, in the above official file list, do the following:
+
+```
+less /star/data14/GRID/NFS_FileList/production_pp500_2022_P25ib_st_physics_FwdTrack_picodst.txt | head -50 | tee production_pp500_2022_50.list
+```
+
+The analysis commands below will work with either file list as input. The complete file list will take time to load; so, it is better to use the partial file list when developling the analysis.
+
+Create directory to hold plots
 ------------------------------
+```
+mkdir plots
+```
+
+Analysis 1: MIP Peak analysis
+-----------------------------
 This analysis code uses tracks projected to the FCS ECal and HCal to search for minimum-ionizing particle (MIP) peaks. Run as:
 
 ```
-mkdir plots
 root4star -l -b -q 'pico.C(2,"production_pp500_2022.list")'
+```
+
+Analysis 2: Forward QA plots
+----------------------------
+This code makes QA plots for the Forward track, the FCS towers, and the FCS clusters. Run as:
+
+```
+root4star -l -b -q 'pico.C(3,"production_pp500_2022.list")'
 ```
 
